@@ -47,13 +47,13 @@ This is a **smart assistant for Maghreb farmers** that simplifies the French INR
 
 ```bash
 # التثبيت
-bun install
+npm install
 
-# التطوير
-bun dev
+# التشغيل
+npm run dev
 
-# البناء للإنتاج
-bun build
+
+
 ```
 
 افتح [http://localhost:3000](http://localhost:3000)

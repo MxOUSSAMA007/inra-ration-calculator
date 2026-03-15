@@ -1,3 +1,5 @@
+import { translations, type Language } from "./i18n";
+
 export interface CowIdentity {
   cowId: string; // ear tag / unique id
   name: string;
@@ -59,18 +61,20 @@ export function getAllPassports(): CowPassport[] {
   }
 }
 
-export function validatePassport(passport: CowPassport): PassportValidation {
+export function validatePassport(passport: CowPassport, lang: Language = "ar"): PassportValidation {
+  const t = translations[lang];
+  
   if (!passport.identity.cowId.trim()) {
-    return { valid: false, error: "رقم الأذن / Cow ID مطلوب." };
+    return { valid: false, error: t.passportValidationCowIdRequired };
   }
 
   if (!passport.identity.name.trim()) {
-    return { valid: false, error: "اسم البقرة مطلوب." };
+    return { valid: false, error: t.passportValidationNameRequired };
   }
 
   const gm = passport.reproduction.gestationMonth ?? 0;
   if (gm < 0 || gm > 9) {
-    return { valid: false, error: "شهر الحمل يجب أن يكون بين 0 و 9." };
+    return { valid: false, error: t.passportValidationGestationRange };
   }
 
   return { valid: true };
@@ -179,17 +183,23 @@ export function computeReproductionDates(lastInseminationDate?: string) {
   };
 }
 
-export function buildNutritionHints(gestationMonth?: number, milkToday?: number, milkYesterday?: number): string[] {
+export function buildNutritionHints(
+  gestationMonth?: number,
+  milkToday?: number,
+  milkYesterday?: number,
+  lang: Language = "ar"
+): string[] {
+  const t = translations[lang];
   const hints: string[] = [];
 
   if ((gestationMonth ?? 0) >= 7) {
-    hints.push("🐄 الشهر السابع+ من الحمل: أضف احتياجات الحمل تلقائياً في حساب UFL/PDI.");
+    hints.push(t.passportHintLateGestation);
   }
 
   if (typeof milkToday === "number" && typeof milkYesterday === "number") {
     const diff = milkYesterday - milkToday;
     if (diff >= 2) {
-      hints.push("📉 انخفاض الحليب ملحوظ: راجع توازن PDI والبروتين المتاح في العليقة.");
+      hints.push(t.passportHintMilkDrop);
     }
   }
 

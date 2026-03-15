@@ -2,10 +2,10 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
+  useEffect,
   useMemo,
-  useSyncExternalStore,
+  useState,
   type ReactNode,
 } from "react";
 import { translations, type Language, type Translations } from "./i18n";
@@ -21,45 +21,32 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 const LANGUAGE_STORAGE_KEY = "inra_lang";
-const LANGUAGE_EVENT = "inra-language-change";
 
 function normalizeLanguage(value: string | null): Language {
   return value === "ar" || value === "fr" || value === "en" ? value : "fr";
 }
 
-function readLanguage(): Language {
-  if (typeof window === "undefined") return "fr";
-  return normalizeLanguage(localStorage.getItem(LANGUAGE_STORAGE_KEY));
-}
-
-function subscribeLanguage(onStoreChange: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
-
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === LANGUAGE_STORAGE_KEY) {
-      onStoreChange();
-    }
-  };
-
-  const onCustomEvent = () => onStoreChange();
-
-  window.addEventListener("storage", onStorage);
-  window.addEventListener(LANGUAGE_EVENT, onCustomEvent);
-
-  return () => {
-    window.removeEventListener("storage", onStorage);
-    window.removeEventListener(LANGUAGE_EVENT, onCustomEvent);
-  };
-}
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const lang = useSyncExternalStore(subscribeLanguage, readLanguage, () => "fr");
+  // Keep first render deterministic across SSR + hydration
+  const [lang, setLang] = useState<Language>("fr");
 
-  const setLang = useCallback((next: Language) => {
+  // Restore user preference after mount to avoid hydration mismatch
+  useEffect(() => {
     if (typeof window === "undefined") return;
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, next);
-    window.dispatchEvent(new Event(LANGUAGE_EVENT));
+
+    const saved = normalizeLanguage(localStorage.getItem(LANGUAGE_STORAGE_KEY));
+    const raf = requestAnimationFrame(() => {
+      setLang(saved);
+    });
+
+    return () => cancelAnimationFrame(raf);
   }, []);
+
+  // Persist latest user choice
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  }, [lang]);
 
   const value: LanguageContextValue = useMemo(
     () => ({
@@ -68,7 +55,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       t: translations[lang],
       dir: lang === "ar" ? "rtl" : "ltr",
     }),
-    [lang, setLang]
+    [lang]
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

@@ -36,6 +36,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Default language behavior — app now starts in French by default and persists user-selected language in localStorage
 - [x] Hydration-safe language store — replaced client-only initializer with `useSyncExternalStore` to avoid server/client text mismatch on first paint
 - [x] Screen separation fix — removed Digital Cow Passport from INRA Calculator screen so each module is isolated in its own view
+- [x] Hydration hardening follow-up — forced deterministic first render (`fr`) and restore saved language post-mount (RAF) to prevent language mismatch warnings in Home SSR hydration
 ## Current Structure
 
 | File/Directory | Purpose | Status |
@@ -114,3 +115,4 @@ export async function GET() {
 | 2026-03-10 | Refined Digital Cow Passport with validation, custom treatments, delete actions, and record-prefill integration |
 | 2026-03-15 | Localized all remaining Home + Digital Cow Passport UI in Arabic/French/English and set default startup language to French with saved preference |
 | 2026-03-15 | Fixed language hydration mismatch and removed Digital Cow Passport from calculator page rendering |
+| 2026-03-15 | Hardened hydration fix with deterministic SSR-first language render and post-mount preference restore |

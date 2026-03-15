@@ -7,12 +7,8 @@ import { useLanguage, LANGUAGE_LABELS, type Language } from "@/lib/language-cont
 
 type ViewMode = "home" | "calculator" | "passport";
 
-export default function Home() {
-  const { lang, setLang } = useLanguage();
-  const [viewMode, setViewMode] = useState<ViewMode>("home");
-
-  // Language Switcher Component
-  const LanguageSwitcher = () => (
+function LanguageSwitcher({ lang, setLang }: { lang: Language; setLang: (l: Language) => void }) {
+  return (
     <div className="flex items-center gap-1 bg-white/10 rounded-xl p-1">
       {(["ar", "fr", "en"] as Language[]).map((l) => (
         <button
@@ -29,6 +25,11 @@ export default function Home() {
       ))}
     </div>
   );
+}
+
+export default function Home() {
+  const { lang, setLang, t } = useLanguage();
+  const [viewMode, setViewMode] = useState<ViewMode>("home");
 
   // Home Screen with Two Gates
   if (viewMode === "home") {
@@ -36,16 +37,16 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-green-950 via-emerald-900 to-teal-900 flex flex-col items-center justify-center p-4">
         {/* Language Switcher */}
         <div className="absolute top-4 right-4">
-          <LanguageSwitcher />
+          <LanguageSwitcher lang={lang} setLang={setLang} />
         </div>
 
         {/* Title */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            🐄 نظام إدارة الأبقار المتكامل
+            {t.homeTitle}
           </h1>
           <p className="text-emerald-300 text-lg">
-            Integrated Cow Management System
+            {t.homeSubtitle}
           </p>
         </div>
 
@@ -59,16 +60,16 @@ export default function Home() {
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="text-7xl mb-2">🧮</div>
               <h2 className="text-2xl font-bold text-white">
-                حاسبة INRA
+                {t.calculatorCardTitle}
               </h2>
               <p className="text-emerald-200 text-sm leading-relaxed">
-                حساب الاحتياجات الغذائية للأبقار الحلوب
+                {t.calculatorCardDescriptionLine1}
                 <br />
-                وفق نظام INRA
+                {t.calculatorCardDescriptionLine2}
               </p>
               <div className="pt-4">
                 <span className="inline-block px-6 py-2 bg-emerald-500 text-white rounded-full font-semibold text-sm group-hover:bg-emerald-400 transition-colors">
-                  افتح الحاسبة ←
+                  {t.openCalculator}
                 </span>
               </div>
             </div>
@@ -82,16 +83,16 @@ export default function Home() {
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="text-7xl mb-2">📋</div>
               <h2 className="text-2xl font-bold text-white">
-                السجل الصحي والوراثي
+                {t.passportCardTitle}
               </h2>
               <p className="text-blue-200 text-sm leading-relaxed">
-                Digital Cow Passport
+                {t.passportCardDescriptionLine1}
                 <br />
-                إدارة هوية البقرة، نسبها، تكاثرها، الأدوية وفترة السحب في مكان واحد
+                {t.passportCardDescriptionLine2}
               </p>
               <div className="pt-4">
                 <span className="inline-block px-6 py-2 bg-blue-500 text-white rounded-full font-semibold text-sm group-hover:bg-blue-400 transition-colors">
-                  افتح السجل ←
+                  {t.openPassport}
                 </span>
               </div>
             </div>
@@ -100,7 +101,7 @@ export default function Home() {
 
         {/* Footer */}
         <p className="mt-12 text-emerald-500/60 text-xs text-center max-w-md">
-          نظام متكامل لإدارة قطعان الأبقار - مصمم للمزارع المغاربية
+          {t.homeFooter}
         </p>
       </div>
     );
@@ -116,9 +117,9 @@ export default function Home() {
             onClick={() => setViewMode("home")}
             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl transition-all"
           >
-            ← الرئيسية
+            {t.backToHome}
           </button>
-          <LanguageSwitcher />
+          <LanguageSwitcher lang={lang} setLang={setLang} />
         </div>
         
         {/* Calculator */}
@@ -139,9 +140,9 @@ export default function Home() {
             onClick={() => setViewMode("home")}
             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl transition-all"
           >
-            ← الرئيسية
+            {t.backToHome}
           </button>
-          <LanguageSwitcher />
+          <LanguageSwitcher lang={lang} setLang={setLang} />
         </div>
         
         {/* Passport */}

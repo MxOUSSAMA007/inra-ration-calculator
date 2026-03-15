@@ -13,6 +13,7 @@ import {
   validatePassport,
   type CowPassport,
 } from "@/lib/cow-passport";
+import { useLanguage } from "@/lib/language-context";
 
 const MEDICINE_PRESETS = [
   { name: "Oxytetracycline", milkDays: 3, meatDays: 28 },
@@ -31,6 +32,7 @@ function emptyPassport(cowId = ""): CowPassport {
 }
 
 export default function DigitalCowPassport() {
+  const { lang, t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [cowId, setCowId] = useState("");
   const [passport, setPassport] = useState<CowPassport>(emptyPassport());
@@ -54,8 +56,8 @@ export default function DigitalCowPassport() {
   const knownCows = mounted ? getUniqueCowNames() : [];
   const alerts = useMemo(() => getWithdrawalAlerts(passport), [passport]);
   const hints = useMemo(
-    () => buildNutritionHints(passport.reproduction.gestationMonth, passport.milkToday, milkYesterday),
-    [passport.reproduction.gestationMonth, passport.milkToday, milkYesterday]
+    () => buildNutritionHints(passport.reproduction.gestationMonth, passport.milkToday, milkYesterday, lang),
+    [passport.reproduction.gestationMonth, passport.milkToday, milkYesterday, lang]
   );
 
   function loadCow(nextCowId: string) {
@@ -111,7 +113,7 @@ export default function DigitalCowPassport() {
   }
 
   function handleSave() {
-    const check = validatePassport(passport);
+    const check = validatePassport(passport, lang);
     if (!check.valid) {
       setMessage(`❌ ${check.error}`);
       return;
@@ -121,7 +123,7 @@ export default function DigitalCowPassport() {
     setPassport(saved);
     setCowId(saved.identity.cowId);
     setSavedCount(getAllPassports().length);
-    setMessage("✅ تم حفظ الجواز الرقمي بنجاح.");
+    setMessage(t.passportSaveSuccess);
   }
 
   if (!mounted) {
@@ -131,54 +133,54 @@ export default function DigitalCowPassport() {
   return (
     <div className="bg-white/10 border border-white/20 rounded-2xl p-6 mt-6 space-y-5">
       <div>
-        <h2 className="text-white text-xl font-bold">📘 السجل الصحي والوراثي (Digital Cow Passport)</h2>
-        <p className="text-white/70 text-sm mt-1">إدارة هوية البقرة، نسبها، تكاثرها، الأدوية وفترة السحب في مكان واحد.</p>
+        <h2 className="text-white text-xl font-bold">{t.passportTitle}</h2>
+        <p className="text-white/70 text-sm mt-1">{t.passportSubtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label className="text-white/80 text-xs">اختيار بقرة من السجلات</label>
+          <label className="text-white/80 text-xs">{t.passportSelectCow}</label>
           <select
             className="w-full mt-1 bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20"
             value={cowId}
             onChange={(e) => loadCow(e.target.value)}
           >
-            <option value="">-- اختر --</option>
+            <option value="">{t.passportSelectPlaceholder}</option>
             {knownCows.map((name) => (
               <option key={name} value={name}>{name}</option>
             ))}
           </select>
         </div>
         <div className="text-xs text-white/60 self-end">
-          عدد جوازات الأبقار المسجلة: <span className="text-emerald-300 font-bold">{savedCount}</span>
+          {t.passportSavedCountLabel} <span className="text-emerald-300 font-bold">{savedCount}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="رقم الأذن / Cow ID" value={passport.identity.cowId} onChange={(e) => setPassport((p) => ({ ...p, identity: { ...p.identity, cowId: e.target.value } }))} />
-        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="الاسم" value={passport.identity.name} onChange={(e) => setPassport((p) => ({ ...p, identity: { ...p.identity, name: e.target.value } }))} />
-        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="السلالة (Holstein / Montbéliarde...)" value={passport.identity.breed} onChange={(e) => setPassport((p) => ({ ...p, identity: { ...p.identity, breed: e.target.value } }))} />
+        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportCowIdPlaceholder} value={passport.identity.cowId} onChange={(e) => setPassport((p) => ({ ...p, identity: { ...p.identity, cowId: e.target.value } }))} />
+        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportNamePlaceholder} value={passport.identity.name} onChange={(e) => setPassport((p) => ({ ...p, identity: { ...p.identity, name: e.target.value } }))} />
+        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportBreedPlaceholder} value={passport.identity.breed} onChange={(e) => setPassport((p) => ({ ...p, identity: { ...p.identity, breed: e.target.value } }))} />
         <input type="date" className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" value={passport.identity.birthDate ?? ""} onChange={(e) => setPassport((p) => ({ ...p, identity: { ...p.identity, birthDate: e.target.value } }))} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="الأم (Dam ID)" value={passport.genetics.damId ?? ""} onChange={(e) => setPassport((p) => ({ ...p, genetics: { ...p.genetics, damId: e.target.value } }))} />
-        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="الثور / المني (Sire ID)" value={passport.genetics.sireId ?? ""} onChange={(e) => setPassport((p) => ({ ...p, genetics: { ...p.genetics, sireId: e.target.value } }))} />
+        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportDamPlaceholder} value={passport.genetics.damId ?? ""} onChange={(e) => setPassport((p) => ({ ...p, genetics: { ...p.genetics, damId: e.target.value } }))} />
+        <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportSirePlaceholder} value={passport.genetics.sireId ?? ""} onChange={(e) => setPassport((p) => ({ ...p, genetics: { ...p.genetics, sireId: e.target.value } }))} />
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-white font-semibold">🗓️ الجدول التكاثري</h3>
+        <h3 className="text-white font-semibold">{t.passportReproductionTitle}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input type="date" className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" value={passport.reproduction.lastInseminationDate ?? ""} onChange={(e) => autoComputeReproduction(e.target.value)} />
-          <input type="number" min={0} max={9} className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="شهر الحمل (0-9)" value={passport.reproduction.gestationMonth ?? 0} onChange={(e) => setPassport((p) => ({ ...p, reproduction: { ...p.reproduction, gestationMonth: parseInt(e.target.value) || 0 } }))} />
-          <input disabled className="bg-black/30 text-white/70 rounded-lg px-3 py-2 border border-white/10" value={passport.reproduction.pregnancyCheckDate ?? ""} placeholder="تنبيه فحص الحمل (+35/+40 يوم)" />
-          <input disabled className="bg-black/30 text-white/70 rounded-lg px-3 py-2 border border-white/10" value={passport.reproduction.dryOffDate ?? ""} placeholder="تنبيه التجفيف" />
-          <input disabled className="bg-black/30 text-white/70 rounded-lg px-3 py-2 border border-white/10 md:col-span-2" value={passport.reproduction.expectedCalvingDate ?? ""} placeholder="تاريخ الولادة المتوقع" />
+          <input type="number" min={0} max={9} className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportGestationMonthPlaceholder} value={passport.reproduction.gestationMonth ?? 0} onChange={(e) => setPassport((p) => ({ ...p, reproduction: { ...p.reproduction, gestationMonth: parseInt(e.target.value) || 0 } }))} />
+          <input disabled className="bg-black/30 text-white/70 rounded-lg px-3 py-2 border border-white/10" value={passport.reproduction.pregnancyCheckDate ?? ""} placeholder={t.passportPregnancyCheckPlaceholder} />
+          <input disabled className="bg-black/30 text-white/70 rounded-lg px-3 py-2 border border-white/10" value={passport.reproduction.dryOffDate ?? ""} placeholder={t.passportDryOffPlaceholder} />
+          <input disabled className="bg-black/30 text-white/70 rounded-lg px-3 py-2 border border-white/10 md:col-span-2" value={passport.reproduction.expectedCalvingDate ?? ""} placeholder={t.passportExpectedCalvingPlaceholder} />
         </div>
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-white font-semibold">💉 فترة السحب (Withdrawal Period)</h3>
+        <h3 className="text-white font-semibold">{t.passportWithdrawalTitle}</h3>
         <div className="flex flex-wrap gap-2">
           {MEDICINE_PRESETS.map((m) => (
             <button key={m.name} onClick={() => addTreatment(m.name, m.milkDays, m.meatDays)} className="bg-rose-500/20 border border-rose-300/30 text-rose-200 px-3 py-1 rounded-lg text-xs hover:bg-rose-500/30">
@@ -188,20 +190,20 @@ export default function DigitalCowPassport() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="دواء مخصص" value={manualMedicine} onChange={(e) => setManualMedicine(e.target.value)} />
-          <input type="number" min={0} className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="سحب الحليب (يوم)" value={manualMilkDays} onChange={(e) => setManualMilkDays(parseInt(e.target.value) || 0)} />
-          <input type="number" min={0} className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="سحب اللحم (يوم)" value={manualMeatDays} onChange={(e) => setManualMeatDays(parseInt(e.target.value) || 0)} />
+          <input className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportManualMedicinePlaceholder} value={manualMedicine} onChange={(e) => setManualMedicine(e.target.value)} />
+          <input type="number" min={0} className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportMilkWithdrawalPlaceholder} value={manualMilkDays} onChange={(e) => setManualMilkDays(parseInt(e.target.value) || 0)} />
+          <input type="number" min={0} className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportMeatWithdrawalPlaceholder} value={manualMeatDays} onChange={(e) => setManualMeatDays(parseInt(e.target.value) || 0)} />
         </div>
         <button onClick={() => addTreatment(manualMedicine, manualMilkDays, manualMeatDays)} className="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs">
-          + إضافة دواء مخصص
+          {t.passportAddCustomMedicine}
         </button>
 
         {passport.treatments.length > 0 && (
           <div className="space-y-1">
             {passport.treatments.map((tx) => (
               <div key={tx.id} className="text-xs text-white/80 flex items-center justify-between bg-black/20 border border-white/10 rounded-lg px-3 py-1.5">
-                <span>{tx.medicineName} · حليب {tx.milkWithdrawalDays} يوم · لحم {tx.meatWithdrawalDays} يوم</span>
-                <button className="text-red-300 hover:text-red-200" onClick={() => removeTreatment(tx.id)}>حذف</button>
+                <span>{tx.medicineName} · {t.passportMilkWithdrawalLabel} {tx.milkWithdrawalDays} {t.dayUnit} · {t.passportMeatWithdrawalLabel} {tx.meatWithdrawalDays} {t.dayUnit}</span>
+                <button className="text-red-300 hover:text-red-200" onClick={() => removeTreatment(tx.id)}>{t.deleteItem}</button>
               </div>
             ))}
           </div>
@@ -211,23 +213,23 @@ export default function DigitalCowPassport() {
           <div className="space-y-2">
             {alerts.map((a, idx) => (
               <div key={`${a.medicineName}-${idx}`} className="bg-red-500/20 border border-red-400/40 text-red-100 rounded-lg px-3 py-2 text-sm">
-                🚫 {a.type === "milk" ? "منع بيع الحليب" : "منع الذبح"} بسبب <b>{a.medicineName}</b> لمدة <b>{a.daysLeft}</b> يوم (حتى {new Date(a.untilDate).toLocaleDateString("ar")})
+                🚫 {a.type === "milk" ? t.passportMilkSaleBlocked : t.passportSlaughterBlocked} {t.becauseOf} <b>{a.medicineName}</b> {t.forDuration} <b>{a.daysLeft}</b> {t.dayUnit} ({t.until} {new Date(a.untilDate).toLocaleDateString(lang === "ar" ? "ar" : lang === "fr" ? "fr-FR" : "en-US")})
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-emerald-300 text-sm">✅ لا توجد فترات سحب نشطة.</div>
+          <div className="text-emerald-300 text-sm">{t.passportNoActiveWithdrawal}</div>
         )}
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-white font-semibold">🥛 الربط مع التغذية (UFL/PDI)</h3>
+        <h3 className="text-white font-semibold">{t.passportNutritionLinkTitle}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input type="number" className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="إنتاج اليوم (لتر)" value={passport.milkToday ?? ""} onChange={(e) => setPassport((p) => ({ ...p, milkToday: parseFloat(e.target.value) || 0 }))} />
-          <input type="number" className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder="إنتاج أمس (لتر)" value={milkYesterday ?? ""} onChange={(e) => setMilkYesterday(parseFloat(e.target.value) || 0)} />
+          <input type="number" className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportMilkTodayPlaceholder} value={passport.milkToday ?? ""} onChange={(e) => setPassport((p) => ({ ...p, milkToday: parseFloat(e.target.value) || 0 }))} />
+          <input type="number" className="bg-black/20 text-white rounded-lg px-3 py-2 border border-white/20" placeholder={t.passportMilkYesterdayPlaceholder} value={milkYesterday ?? ""} onChange={(e) => setMilkYesterday(parseFloat(e.target.value) || 0)} />
         </div>
         <div className="space-y-1">
-          {hints.length > 0 ? hints.map((h) => <p key={h} className="text-amber-200 text-sm">{h}</p>) : <p className="text-white/50 text-sm">لا توجد ملاحظات غذائية حالياً.</p>}
+          {hints.length > 0 ? hints.map((h) => <p key={h} className="text-amber-200 text-sm">{h}</p>) : <p className="text-white/50 text-sm">{t.passportNoNutritionHints}</p>}
         </div>
       </div>
 
@@ -237,7 +239,7 @@ export default function DigitalCowPassport() {
         onClick={handleSave}
         className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl"
       >
-        💾 حفظ الجواز الرقمي للبقرة
+        {t.passportSaveButton}
       </button>
     </div>
   );

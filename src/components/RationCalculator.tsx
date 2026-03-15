@@ -13,7 +13,6 @@ import { getAllRecords } from "@/lib/cow-records";
 import { useLanguage, LANGUAGE_LABELS, type Language } from "@/lib/language-context";
 import ResultsPanel from "./ResultsPanel";
 import CowRecordsView from "./CowRecordsView";
-import DigitalCowPassport from "./DigitalCowPassport";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -262,8 +261,6 @@ export default function RationCalculator() {
           )}
         </div>
       </div>
-
-      <DigitalCowPassport />
 
       <p className="mt-6 text-emerald-500 text-xs text-center">
         {t.footer}

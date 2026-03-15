@@ -32,6 +32,8 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Add warning system — energy deficit, nitrogen excess, protein imbalance, DMI exceeded alerts with AR/FR/EN translations
 - [x] Digital Cow Passport — added health/genetic passport UI (identity, lineage, reproduction timeline, treatment withdrawal alerts) with localStorage persistence and nutrition hints linked to gestation/milk drop
 - [x] Digital Cow Passport refinement — added validation, mounted-safe localStorage access, custom medicine entries, treatment deletion, and prefill from latest cow records
+- [x] Full trilingual home/passport localization — translated remaining hardcoded Home + Digital Cow Passport strings to AR/FR/EN and localized validation/nutrition hints
+- [x] Default language behavior — app now starts in French by default and persists user-selected language in localStorage
 ## Current Structure
 
 | File/Directory | Purpose | Status |
@@ -108,3 +110,4 @@ export async function GET() {
 | 2026-03-10 | Added Digital Cow Passport module (health/genetic records, reproduction auto-dates, withdrawal period alerts, nutrition linkage hints) |
 
 | 2026-03-10 | Refined Digital Cow Passport with validation, custom treatments, delete actions, and record-prefill integration |
+| 2026-03-15 | Localized all remaining Home + Digital Cow Passport UI in Arabic/French/English and set default startup language to French with saved preference |

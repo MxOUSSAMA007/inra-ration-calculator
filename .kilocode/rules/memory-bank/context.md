@@ -37,6 +37,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Hydration-safe language store — replaced client-only initializer with `useSyncExternalStore` to avoid server/client text mismatch on first paint
 - [x] Screen separation fix — removed Digital Cow Passport from INRA Calculator screen so each module is isolated in its own view
 - [x] Hydration hardening follow-up — forced deterministic first render (`fr`) and restore saved language post-mount (RAF) to prevent language mismatch warnings in Home SSR hydration
+- [x] Home hydration guard — added mounted gate in `src/app/page.tsx` so SSR/first client render are identical and prevent recoverable hydration text mismatch on language-dependent content
 ## Current Structure
 
 | File/Directory | Purpose | Status |
@@ -116,3 +117,4 @@ export async function GET() {
 | 2026-03-15 | Localized all remaining Home + Digital Cow Passport UI in Arabic/French/English and set default startup language to French with saved preference |
 | 2026-03-15 | Fixed language hydration mismatch and removed Digital Cow Passport from calculator page rendering |
 | 2026-03-15 | Hardened hydration fix with deterministic SSR-first language render and post-mount preference restore |
+| 2026-03-15 | Added Home mounted hydration guard to eliminate SSR/client text mismatch warnings on translated headings/buttons |

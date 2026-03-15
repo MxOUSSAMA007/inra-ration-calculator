@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RationCalculator from "@/components/RationCalculator";
 import DigitalCowPassport from "@/components/DigitalCowPassport";
 import { useLanguage, LANGUAGE_LABELS, type Language } from "@/lib/language-context";
@@ -30,6 +30,19 @@ function LanguageSwitcher({ lang, setLang }: { lang: Language; setLang: (l: Lang
 export default function Home() {
   const { lang, setLang, t } = useLanguage();
   const [viewMode, setViewMode] = useState<ViewMode>("home");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // Prevent SSR/client text mismatch during hydration
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-950 via-emerald-900 to-teal-900" />
+    );
+  }
 
   // Home Screen with Two Gates
   if (viewMode === "home") {

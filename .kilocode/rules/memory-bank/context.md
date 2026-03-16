@@ -36,6 +36,8 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Default language behavior — app now starts in French by default and persists user-selected language in localStorage
 - [x] UX review artifacts — captured screenshots for Home, Calculator view, and Digital Cow Passport view for stakeholder feedback
 - [x] Calculator/Passport separation fix — removed embedded passport panel from calculator screen so each mode shows only its own module
+- [x] Hydration stability fix — language now initializes to a server-safe default (French) then loads localStorage preference after mount to avoid SSR/client text mismatch
+- [x] Font loading hardening — removed runtime Google Fonts dependency from layout to prevent dev warnings when Google Fonts is unreachable
 ## Current Structure
 
 | File/Directory | Purpose | Status |
@@ -115,3 +117,5 @@ export async function GET() {
 | 2026-03-15 | Localized all remaining Home + Digital Cow Passport UI in Arabic/French/English and set default startup language to French with saved preference |
 | 2026-03-16 | Performed a no-fluff project assessment and generated UI screenshots for the Home, Calculator, and Passport screens |
 | 2026-03-16 | Fixed UI mode isolation so Calculator mode no longer renders the Digital Cow Passport panel below the calculator |
+| 2026-03-16 | Fixed hydration mismatch by deferring localStorage language restore to client mount while keeping a deterministic SSR default |
+| 2026-03-16 | Removed `next/font/google` from root layout to eliminate Google Fonts fetch warnings in restricted/offline environments |

@@ -35,6 +35,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] Full trilingual home/passport localization — translated remaining hardcoded Home + Digital Cow Passport strings to AR/FR/EN and localized validation/nutrition hints
 - [x] Default language behavior — app now starts in French by default and persists user-selected language in localStorage
 - [x] UX review artifacts — captured screenshots for Home, Calculator view, and Digital Cow Passport view for stakeholder feedback
+- [x] Calculator/Passport separation fix — removed embedded passport panel from calculator screen so each mode shows only its own module
 ## Current Structure
 
 | File/Directory | Purpose | Status |
@@ -113,3 +114,5 @@ export async function GET() {
 | 2026-03-10 | Refined Digital Cow Passport with validation, custom treatments, delete actions, and record-prefill integration |
 | 2026-03-15 | Localized all remaining Home + Digital Cow Passport UI in Arabic/French/English and set default startup language to French with saved preference |
 | 2026-03-16 | Performed a no-fluff project assessment and generated UI screenshots for the Home, Calculator, and Passport screens |
+| 2026-03-16 | Fixed UI mode isolation so Calculator mode no longer renders the Digital Cow Passport panel below the calculator |
+
